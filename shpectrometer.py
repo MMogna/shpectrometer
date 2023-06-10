@@ -1,5 +1,4 @@
 import curses
-from curses.textpad import Textbox, rectangle
 from curses import wrapper
 import textwrap
 
@@ -25,13 +24,14 @@ def create_box(top, left, width, height, draw_border=False, title=None):
     if title:
         box.addstr(0, 2, f" {title} ", curses.color_pair(1))
     box.refresh()
-    return [box, box.derwin(height - 2, width - 4, 1, 2)]
+    return [box, box.derwin(height - 2, width - 3, 1, 2)]
 
 
 def print_to_box(boxes, text):
     box = boxes[1]
-    _, y = box.getmaxyx()
-    box.addstr(1, 1, textwrap.fill(text, y - 1))
+    text=text.strip().rstrip()
+    y, x = box.getmaxyx()
+    box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y))
     box.refresh()
 
 
