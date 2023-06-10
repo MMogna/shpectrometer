@@ -36,8 +36,6 @@ def print_to_box(boxes, text):
 
 
 def draw_ui(stdscr):
-    width = 50
-
     host = create_box(top=0,
                       left=0,
                       width=34,
@@ -88,9 +86,8 @@ def draw_ui(stdscr):
                      title="Power info")
 
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vel nulla leo. Sed sed felis hendrerit nisl faucibus faucibus. Morbi vitae dui metus. Proin vel orci vel nunc hendrerit sodales. Phasellus nisi magna, finibus nec fermentum at, facilisis sit amet lacus. Morbi in eros congue nisl ultricies finibus. Fusce eros nulla, semper a massa et, accumsan pellentesque tellus. Cras eu pharetra elit. Praesent laoreet posuere mi non suscipit. Vivamus ac fermentum orci. Vestibulum volutpat lorem ut congue ornare. Integer diam felis, facilisis sit amet lectus in, pulvinar mollis leo."
-    print_to_box(eng, text)
 
-    return {
+    items = {
         "host": host,
         "cpu": cpu,
         "ram": ram,
@@ -99,6 +96,13 @@ def draw_ui(stdscr):
         "pci": pci,
         "eng": eng
     }
+
+    for i in items.values():
+        print_to_box(i, text)
+
+    stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
+
+    return items
 
 
 def main(stdscr):
@@ -113,7 +117,8 @@ def main(stdscr):
     items = draw_ui(stdscr=stdscr)
 
     while True:
-        if stdscr.getch() == curses.KEY_RESIZE:
+        ch = stdscr.getch()
+        if ch == curses.KEY_RESIZE:
             MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
             curses.resizeterm(MAX_ROWS, MAX_COLS)
             stdscr.clear()
@@ -123,10 +128,8 @@ def main(stdscr):
             except:
                 stdscr.clear()
                 stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
-
-    input()
-
-
+        elif ch == ord('q'):
+            break
 
 
 wrapper(main)
