@@ -3,6 +3,8 @@ from curses import wrapper
 import textwrap
 from time import sleep
 
+from host_explorer import print_host_info
+from cpu_explorer import print_cpu_info
 from net_explorer import print_nics
 
 global MAX_ROWS, MAX_COLS
@@ -27,7 +29,7 @@ def create_box(top, left, width, height, draw_border=False, title=None):
     if title:
         box.addstr(0, 2, f" {title} ", curses.color_pair(1))
     box.refresh()
-    return [box, box.derwin(height - 2, width - 3, 1, 2)]
+    return [box, box.derwin(height - 2, width - 3, 2, 2)]
 
 
 def print_to_box(boxes, text, wrap=True):
@@ -40,7 +42,7 @@ def print_to_box(boxes, text, wrap=True):
         text_list = text.split("\n")
         for i, t in enumerate(text_list):
             text_list[i] = textwrap.fill(t, width=x-1, break_long_words=False)
-        text = '\n'.join(text_list)
+        text = '\n'.join(text_list[0:y-1])
         box.addstr(0, 0, text)
     box.refresh()
 
@@ -107,6 +109,8 @@ def draw_ui(stdscr):
         "eng": eng
     }
 
+    print_to_box(host, print_host_info(), wrap=False)
+    print_to_box(cpu, print_cpu_info(), wrap=False)
     print_to_box(net, print_nics(), wrap=False)
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
@@ -127,15 +131,15 @@ def main(stdscr):
 
     while True:
         ch = stdscr.getch()
-        if ch == curses.KEY_RESIZE:
-            sleep(1)
-            MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
-            curses.resizeterm(MAX_ROWS, MAX_COLS)
-            try:
-                items = draw_ui(stdscr=stdscr)
-            except:
-                stdscr.clear()
-                stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
+        # if ch == curses.KEY_RESIZE:
+        #     sleep(1)
+        #     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
+        #     curses.resizeterm(MAX_ROWS, MAX_COLS)
+        #     try:
+        #         items = draw_ui(stdscr=stdscr)
+        #     except:
+        #         stdscr.clear()
+        #         stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
         if ch == ord('q'):
             break
 
