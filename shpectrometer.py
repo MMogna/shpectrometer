@@ -1,6 +1,9 @@
 import curses
 from curses import wrapper
 import textwrap
+from time import sleep
+
+from net_explorer import print_nics
 
 global MAX_ROWS, MAX_COLS
 
@@ -27,11 +30,18 @@ def create_box(top, left, width, height, draw_border=False, title=None):
     return [box, box.derwin(height - 2, width - 3, 1, 2)]
 
 
-def print_to_box(boxes, text):
+def print_to_box(boxes, text, wrap=True):
     box = boxes[1]
     text=text.strip().rstrip()
     y, x = box.getmaxyx()
-    box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y))
+    if wrap:
+        box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y))
+    else:
+        text_list = text.split("\n")
+        for i, t in enumerate(text_list):
+            text_list[i] = textwrap.fill(t, width=x-1, break_long_words=False)
+        text = '\n'.join(text_list)
+        box.addstr(0, 0, text)
     box.refresh()
 
 
@@ -97,8 +107,7 @@ def draw_ui(stdscr):
         "eng": eng
     }
 
-    for i in items.values():
-        print_to_box(i, text)
+    print_to_box(net, print_nics(), wrap=False)
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
 
@@ -119,16 +128,15 @@ def main(stdscr):
     while True:
         ch = stdscr.getch()
         if ch == curses.KEY_RESIZE:
+            sleep(1)
             MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
             curses.resizeterm(MAX_ROWS, MAX_COLS)
-            stdscr.clear()
-            stdscr.refresh()
             try:
                 items = draw_ui(stdscr=stdscr)
             except:
                 stdscr.clear()
                 stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
-        elif ch == ord('q'):
+        if ch == ord('q'):
             break
 
 
