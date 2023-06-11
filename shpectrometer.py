@@ -111,6 +111,7 @@ def draw_ui(stdscr):
     }
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
+    stdscr.addstr(MAX_ROWS - 1 , 18, f" Press R to refresh. ", curses.color_pair(1))
 
     return items
 
@@ -131,26 +132,37 @@ def main(stdscr):
 
     stdscr.refresh()
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
+
+    running = True
+
     items = draw_ui(stdscr=stdscr)
 
     print_info(items=items)
 
-    while True:
+    running = True
+
+    while running:
         ch = stdscr.getch()
         if ch == curses.KEY_RESIZE:
             MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
             curses.resizeterm(MAX_ROWS, MAX_COLS)
-            stdscr.clear()
+            stdscr.erase()
+            stdscr.refresh()
             try:
                 items = draw_ui(stdscr=stdscr)
                 print_info(items=items)
-                sleep(1)
             except:
                 stdscr.clear()
                 stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
-        if ch == ord('q'):
-            break
-        ch = None
+        elif ch == ord('q'):
+            running = False
+            curses.endwin()
+        elif ch == ord('r'):
+            print_info(items=items)
+            for i in items.values():
+                i[1].refresh()
+        curses.doupdate()
+        curses.flushinp()
 
 
 wrapper(main)
