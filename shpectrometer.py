@@ -5,6 +5,7 @@ from time import sleep
 
 from host_explorer import print_host_info
 from cpu_explorer import print_cpu_info
+from ram_explorer import print_ram_info
 from net_explorer import print_nics
 
 global MAX_ROWS, MAX_COLS
@@ -57,14 +58,14 @@ def draw_ui(stdscr):
 
     cpu = create_box(top=0,
                      left=34,
-                     width=50,
+                     width=25,
                      height=25,
                      draw_border=True,
                      title="CPU info")
 
     ram = create_box(top=0,
-                     left=84,
-                     width=16,
+                     left=59,
+                     width=41,
                      height=25,
                      draw_border=True,
                      title="RAM info")
@@ -109,13 +110,16 @@ def draw_ui(stdscr):
         "eng": eng
     }
 
-    print_to_box(host, print_host_info(), wrap=False)
-    print_to_box(cpu, print_cpu_info(), wrap=False)
-    print_to_box(net, print_nics(), wrap=False)
-
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
 
     return items
+
+
+def print_info(items):
+    print_to_box(items["host"], print_host_info(), wrap=False)
+    print_to_box(items["cpu"], print_cpu_info(), wrap=False)
+    print_to_box(items["ram"], print_ram_info(), wrap=False)
+    print_to_box(items["net"], print_nics(), wrap=False)
 
 
 def main(stdscr):
@@ -129,19 +133,24 @@ def main(stdscr):
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
     items = draw_ui(stdscr=stdscr)
 
+    print_info(items=items)
+
     while True:
         ch = stdscr.getch()
-        # if ch == curses.KEY_RESIZE:
-        #     sleep(1)
-        #     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
-        #     curses.resizeterm(MAX_ROWS, MAX_COLS)
-        #     try:
-        #         items = draw_ui(stdscr=stdscr)
-        #     except:
-        #         stdscr.clear()
-        #         stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
+        if ch == curses.KEY_RESIZE:
+            MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
+            curses.resizeterm(MAX_ROWS, MAX_COLS)
+            stdscr.clear()
+            try:
+                items = draw_ui(stdscr=stdscr)
+                print_info(items=items)
+                sleep(1)
+            except:
+                stdscr.clear()
+                stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
         if ch == ord('q'):
             break
+        ch = None
 
 
 wrapper(main)
