@@ -6,6 +6,7 @@ from time import sleep
 from host_explorer import print_host_info
 from cpu_explorer import print_cpu_info
 from ram_explorer import print_ram_info
+from pci_explorer import print_pci_info
 from net_explorer import print_nics
 
 global MAX_ROWS, MAX_COLS
@@ -120,6 +121,7 @@ def print_info(items):
     print_to_box(items["host"], print_host_info(), wrap=False)
     print_to_box(items["cpu"], print_cpu_info(), wrap=False)
     print_to_box(items["ram"], print_ram_info(), wrap=False)
+    print_to_box(items["pci"], print_pci_info(), wrap=False)
     print_to_box(items["net"], print_nics(), wrap=False)
 
 
