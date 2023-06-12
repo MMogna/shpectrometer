@@ -5,6 +5,10 @@ CMD_LIST_NICS = r"ls -l /sys/class/net/*/device | cut -d/ -f5,13"
 CMD_LINK_SPEED = "cat /sys/class/net/<INTERFACE_NAME>/speed"
 CMD_IP_WRAPPER = "ip -p -j address show <INTERFACE_NAME>"
 CMD_GET_GW = "ip r | grep default | grep <IPADDR> | grep <INTERFACE_NAME>"
+CMD_BMC_IP = "ipmitool lan print | grep -m 1 'IP Address[[:space:]][[:space:]]' | cut -d ':' -f2"
+CMD_BMC_GW = "ipmitool lan print | grep -m 1 'Default Gateway IP' | cut -d ':' -f2"
+CMD_BMC_MAC = "ipmitool lan print | grep -m 1 'MAC Address' | cut -d ':' -f2-"
+CMD_BMC_MASK = "ipmitool lan print | grep -m 1 'Subnet Mask' | cut -d ':' -f2"
 
 SPEED_LUT = {
     '100': '100Mbps',
@@ -48,6 +52,40 @@ def get_nic_gw(nic_name, ipaddr):
 
 
 
+def get_bmc_net_config():
+    output = subprocess.run(CMD_BMC_IP,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    ip = output.stdout.decode().strip()
+    output = subprocess.run(CMD_BMC_GW,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    gw = output.stdout.decode().strip()
+    output = subprocess.run(CMD_BMC_MAC,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    mac = output.stdout.decode().strip()
+    output = subprocess.run(CMD_BMC_MASK,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    mask = output.stdout.decode().strip()
+    
+    ret = {
+            "mac": mac,
+            "speed": "100",
+            "addr": [
+                {
+                    "type": "ipv4",
+                    "ip": ip,
+                    "mask": sum(bin(int(x)).count('1') for x in mask.split('.')),
+                    "gw": gw
+                }
+            ]
+        }
+    
+    return ret
+
+
 def get_net_config(nic_name):
     result = subprocess.run(CMD_IP_WRAPPER.replace("<INTERFACE_NAME>", nic_name),
                             shell=True,
@@ -73,6 +111,7 @@ def get_net_config(nic_name):
                 "gw": get_nic_gw(nic_name=nic_name, ipaddr=a["local"])
             })
     nic_config["speed"] = get_nic_speed(nic_name=nic_name)
+
     return nic_config
 
 
@@ -82,6 +121,8 @@ def print_nics():
     for n in nics:
         nic_configs[n] = get_net_config(n)
     
+    nic_configs["bmc"] = get_bmc_net_config()
+
     output = ""
     for n, nc in nic_configs.items():
         addr_strs = []
@@ -97,4 +138,4 @@ def print_nics():
     return output
 
 if __name__ == "__main__":
-    print(print_nics())
+    print(get_bmc_net_config())
