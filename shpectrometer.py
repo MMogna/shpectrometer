@@ -142,10 +142,6 @@ def draw_ui(stdscr):
                         0,
                         0)
 
-    # logo[1].bkgdset(" ", curses.color_pair(4) | curses.A_BOLD)
-    # logo[1].refresh()
-    # y, x = logo[1].getmaxyx()
-    # logo[0].addstr(1, 1, ' '+(" "* x + '\n')*y, curses.color_pair(4))
     print_to_box(logo, get_logo(), wrap=False, cp = curses.color_pair(1) | curses.A_BOLD)
 
     return items
