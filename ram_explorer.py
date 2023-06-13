@@ -36,7 +36,7 @@ def get_ram_speed():
 
 def print_ram_info():
     slots = ["0GB" if s == "NoModuleInstalled" else s for s in get_ram_slots()]
-    sizes = [int(s.replace("GB",'')) for s in slots]
+    sizes = [int(s.replace("GB",'0')) for s in slots]
     output = ""
     output += f"Size: {sum(sizes)}GB\n"
     output += f"Slots setup: {' - '.join(slots)}\n\n"
