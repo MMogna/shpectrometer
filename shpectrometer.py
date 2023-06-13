@@ -47,7 +47,7 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
         box.addstr(0, 2, f" {title} ", curses.color_pair(1) | curses.A_BOLD)
     box.refresh()
     if not fill:
-        der = box.derwin(height - 2, width - 4, 2, 2)
+        der = box.derwin(height - 3, width - 4, 2, 2)
     else:
         der = box.derwin(height - 1, width -2, 1, 1)
     return [box, der]
