@@ -127,8 +127,7 @@ def print_nics():
     for n, nc in nic_configs.items():
         addr_strs = []
         for a in nc["addr"]:
-            if a["gw"]:
-                addr_strs.append(f"{a['ip']}/{a['mask']} gateway {a['gw']}")
+             addr_strs.append(f"{a['ip']}/{a['mask']} gateway {a.get('gw')}")
         output+=f"{n}:\n"
         output+=f"  addr: {', '.join(addr_strs)}\n"
         output+=f"  mac: {nc['mac']}\n"
