@@ -1,4 +1,5 @@
 import curses
+from _curses import error as CursesError
 from curses import wrapper
 import textwrap
 from os import environ, geteuid
@@ -21,19 +22,20 @@ global MAX_ROWS, MAX_COLS
 curses.initscr()
 if curses.has_colors():
     curses.start_color()
-    curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(1, 214, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_BLACK, 214)
 
-def get_logo():
+def get_info():
     output = ""
-    output += "ELEMENTO\n"
-    output += "Shell Meter\n"
+    output += "Created by Elemento Cloud\n"
+    output += "Visit www.elemento.cloud\n"
     output += "v 0.1.0\n"
     return output
 
 
-def create_box(top, left, width, height, draw_border=False, title=None, fill=False):
+def create_box(top, left, width, height, draw_border=False, title=None, fill=False, bg=None):
     global MAX_ROWS, MAX_COLS
 
     curses.setsyx(0, 0)
@@ -42,6 +44,11 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
     height = int(MAX_ROWS * height / 100)
     top = int(MAX_ROWS * top / 100)
     left = int(MAX_COLS * left / 100)
+
+    if left + width > MAX_COLS:
+        width = MAX_COLS - left
+    if top + height > MAX_ROWS:
+        height = MAX_ROWS - top
 
     box = curses.newwin(height,
                         width,
@@ -55,7 +62,9 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
     if not fill:
         der = box.derwin(height - 3, width - 4, 2, 2)
     else:
-        der = box.derwin(height - 1, width -2, 1, 1)
+        der = box.derwin(height - 2, width -2, 1, 1)
+    if bg:
+        der.bkgd(' ', curses.color_pair(bg))
     return [box, der]
 
 
@@ -79,7 +88,9 @@ def draw_ui(stdscr):
                       left=0,
                       width=16,
                       height=25,
-                      draw_border=True)
+                      draw_border=True,
+                      fill=False,
+                      title="Elemento Shell Meter")
     host = create_box(top=0,
                       left=16,
                       width=18,
@@ -148,7 +159,7 @@ def draw_ui(stdscr):
                         0,
                         0)
 
-    print_to_box(logo, get_logo(), wrap=False, cp = curses.color_pair(1) | curses.A_BOLD)
+    print_to_box(logo, get_info(), wrap=False, cp = curses.A_BOLD)
 
     return items
 
@@ -173,7 +184,7 @@ def main(stdscr):
     try:
         items = draw_ui(stdscr=stdscr)
         print_info(items=items)
-    except:
+    except CursesError:
         stdscr.clear()
         stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
 
@@ -189,7 +200,7 @@ def main(stdscr):
             try:
                 items = draw_ui(stdscr=stdscr)
                 print_info(items=items)
-            except:
+            except CursesError:
                 stdscr.clear()
                 stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
         elif ch == ord('q'):
@@ -205,4 +216,4 @@ def main(stdscr):
 
 wrapper(main)
 # if __name__ == "__main__":
-    # print(get_logo())
+    # print(get_info())
