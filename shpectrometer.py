@@ -26,6 +26,7 @@ if curses.has_colors():
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_BLACK, 214)
+    curses.init_pair(5, 215, curses.COLOR_BLACK)
 
 def get_info():
     output = ""
@@ -60,7 +61,7 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
         box.addstr(0, 2, f" {title} ", curses.color_pair(1) | curses.A_BOLD)
     box.refresh()
     if not fill:
-        der = box.derwin(height - 3, width - 4, 2, 2)
+        der = box.derwin(height - 3, width - 5, 2, 3)
     else:
         der = box.derwin(height - 2, width -2, 1, 1)
     if bg:
@@ -68,18 +69,49 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
     return [box, der]
 
 
+def print_and_format(target, index, line, header_attr=None, text_attr=None):
+    if len(line) and ':' in line:
+        found = line.index(':')
+        is_header = False
+        try:
+            is_header = line[found+1] == ' ' and line[0] != ' '
+        except IndexError:
+            is_header = True
+        if is_header:
+            lines = line.split(':', 1)
+            if len(lines) == 2:
+                target.addstr(index, 0, f"{lines[0]}:", header_attr or curses.color_pair(5))
+                target.addstr(index, len(lines[0])+1, lines[1], text_attr or curses.color_pair(3))
+                return
+    target.addstr(index, 0, line, text_attr or curses.color_pair(3))
+
+
+
 def print_to_box(boxes, text, wrap=True, cp=None):
     box = boxes[1]
     text=text.strip().rstrip()
     y, x = box.getmaxyx()
     if wrap:
-        box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y), cp or  curses.color_pair(3))
+        text = textwrap.fill(text, width=x -1, max_lines=y)
+        i = 0
+        for line in text.split('/n'):
+            print_and_format(box, i, line)
+            i+=1
     else:
-        text_list = text.split("\n")
-        for i, t in enumerate(text_list):
-            text_list[i] = textwrap.fill(t, width=x-1, break_long_words=False)
-        text = '\n'.join(text_list[0:y-1])
-        box.addstr(0, 0, text, cp or  curses.color_pair(3))
+        text = text.split("\n")
+        text_list = []
+        for i, t in enumerate(text):
+            wrapped = textwrap.wrap(t, width=x-1)
+            text_list += wrapped
+        i = 0
+        for line in text_list:
+            if i > y - 2:
+                print_and_format(box, i, f"{' '*(x-6)}[...]")
+                break
+            print_and_format(box, i, line)
+            if len(line) > x:
+                i+=1
+            i+=1
     box.refresh()
 
 
