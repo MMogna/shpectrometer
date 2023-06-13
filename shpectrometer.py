@@ -1,7 +1,7 @@
 import curses
 from curses import wrapper
 import textwrap
-from os import path
+from os import environ, geteuid
 
 from host_explorer import print_host_info
 from cpu_explorer import print_cpu_info
@@ -9,6 +9,12 @@ from ram_explorer import print_ram_info
 from pci_explorer import print_pci_info
 from net_explorer import print_nics
 from pow_explorer import print_total_power
+
+def check_privileges():
+    if not environ.get("SUDO_UID") and geteuid() != 0:
+        raise PermissionError("You need to run this script with sudo or as root.")
+
+check_privileges()
 
 global MAX_ROWS, MAX_COLS
 
