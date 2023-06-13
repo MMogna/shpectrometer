@@ -97,7 +97,6 @@ def get_net_config(nic_name):
     br = get_nic_master_bridge(nic_name=nic_name)
     nic_to_find = nic_name
     if br:
-        print(f"{nic_name} is member of {br}")
         nic_to_find = br
     result = subprocess.run(CMD_IP_WRAPPER.replace("<INTERFACE_NAME>", nic_to_find),
                             shell=True,
@@ -139,7 +138,6 @@ def print_nics():
     output = ""
     for n, nc in nic_configs.items():
         addr_strs = []
-        print(nc)
         for a in nc["addr"]:
              addr_strs.append(f"{a['ip']}/{a['mask']} gateway {a.get('gw')}")
         output+=f"{nc['name']}:\n"
