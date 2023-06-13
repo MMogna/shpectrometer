@@ -164,9 +164,12 @@ def main(stdscr):
 
     running = True
 
-    items = draw_ui(stdscr=stdscr)
-
-    print_info(items=items)
+    try:
+        items = draw_ui(stdscr=stdscr)
+        print_info(items=items)
+    except:
+        stdscr.clear()
+        stdscr.addstr(0, 0, "Terminal too small!", curses.color_pair(2))
 
     running = True
 
