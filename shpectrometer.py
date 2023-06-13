@@ -8,6 +8,7 @@ from cpu_explorer import print_cpu_info
 from ram_explorer import print_ram_info
 from pci_explorer import print_pci_info
 from net_explorer import print_nics
+from pow_explorer import print_total_power
 
 global MAX_ROWS, MAX_COLS
 
@@ -92,7 +93,7 @@ def draw_ui(stdscr):
                      draw_border=True,
                      title="PCIe info")
 
-    eng = create_box(top=26,
+    pow = create_box(top=26,
                      left=75,
                      width=25,
                      height=74,
@@ -108,7 +109,7 @@ def draw_ui(stdscr):
         "net": net,
         "dsk": dsk,
         "pci": pci,
-        "eng": eng
+        "pow": pow
     }
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
@@ -123,6 +124,7 @@ def print_info(items):
     print_to_box(items["ram"], print_ram_info(), wrap=False)
     print_to_box(items["pci"], print_pci_info(), wrap=False)
     print_to_box(items["net"], print_nics(), wrap=False)
+    print_to_box(items["pow"], print_total_power(), wrap=False)
 
 
 def main(stdscr):
