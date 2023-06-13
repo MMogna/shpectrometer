@@ -1,7 +1,7 @@
 import curses
 from curses import wrapper
 import textwrap
-from time import sleep
+from os import path
 
 from host_explorer import print_host_info
 from cpu_explorer import print_cpu_info
@@ -12,8 +12,22 @@ from pow_explorer import print_total_power
 
 global MAX_ROWS, MAX_COLS
 
+curses.initscr()
+if curses.has_colors():
+    curses.start_color()
+    curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(1, 214, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
 
-def create_box(top, left, width, height, draw_border=False, title=None):
+def get_logo():
+    output = ""
+    output += "ELEMENTO\n"
+    output += "Shell Meter\n"
+    output += "v 0.1.0\n"
+    return output
+
+
+def create_box(top, left, width, height, draw_border=False, title=None, fill=False):
     global MAX_ROWS, MAX_COLS
 
     curses.setsyx(0, 0)
@@ -30,30 +44,39 @@ def create_box(top, left, width, height, draw_border=False, title=None):
     if draw_border:
         box.border(0, 0, 0, 0, 0, 0, 0, 0)
     if title:
-        box.addstr(0, 2, f" {title} ", curses.color_pair(1))
+        box.addstr(0, 2, f" {title} ", curses.color_pair(1) | curses.A_BOLD)
     box.refresh()
-    return [box, box.derwin(height - 2, width - 3, 2, 2)]
+    if not fill:
+        der = box.derwin(height - 2, width - 4, 2, 2)
+    else:
+        der = box.derwin(height - 1, width -2, 1, 1)
+    return [box, der]
 
 
-def print_to_box(boxes, text, wrap=True):
+def print_to_box(boxes, text, wrap=True, cp=None):
     box = boxes[1]
     text=text.strip().rstrip()
     y, x = box.getmaxyx()
     if wrap:
-        box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y))
+        box.addstr(0, 0, textwrap.fill(text, width=x -1, max_lines=y), cp or  curses.color_pair(3))
     else:
         text_list = text.split("\n")
         for i, t in enumerate(text_list):
             text_list[i] = textwrap.fill(t, width=x-1, break_long_words=False)
         text = '\n'.join(text_list[0:y-1])
-        box.addstr(0, 0, text)
+        box.addstr(0, 0, text, cp or  curses.color_pair(3))
     box.refresh()
 
 
 def draw_ui(stdscr):
-    host = create_box(top=0,
+    logo = create_box(top=0,
                       left=0,
-                      width=34,
+                      width=16,
+                      height=25,
+                      draw_border=True)
+    host = create_box(top=0,
+                      left=16,
+                      width=18,
                       height=25,
                       draw_border=True,
                       title="Host info")
@@ -100,8 +123,6 @@ def draw_ui(stdscr):
                      draw_border=True,
                      title="Power info")
 
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vel nulla leo. Sed sed felis hendrerit nisl faucibus faucibus. Morbi vitae dui metus. Proin vel orci vel nunc hendrerit sodales. Phasellus nisi magna, finibus nec fermentum at, facilisis sit amet lacus. Morbi in eros congue nisl ultricies finibus. Fusce eros nulla, semper a massa et, accumsan pellentesque tellus. Cras eu pharetra elit. Praesent laoreet posuere mi non suscipit. Vivamus ac fermentum orci. Vestibulum volutpat lorem ut congue ornare. Integer diam felis, facilisis sit amet lectus in, pulvinar mollis leo."
-
     items = {
         "host": host,
         "cpu": cpu,
@@ -115,11 +136,23 @@ def draw_ui(stdscr):
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
     stdscr.addstr(MAX_ROWS - 1 , 18, f" Press R to refresh. ", curses.color_pair(1))
 
+    y, x = logo[0].getmaxyx()
+    box = curses.newwin(y,
+                        x,
+                        0,
+                        0)
+
+    # logo[1].bkgdset(" ", curses.color_pair(4) | curses.A_BOLD)
+    # logo[1].refresh()
+    # y, x = logo[1].getmaxyx()
+    # logo[0].addstr(1, 1, ' '+(" "* x + '\n')*y, curses.color_pair(4))
+    print_to_box(logo, get_logo(), wrap=False, cp = curses.color_pair(1) | curses.A_BOLD)
+
     return items
 
 
 def print_info(items):
-    print_to_box(items["host"], print_host_info(), wrap=False)
+    print_to_box(items["host"], print_host_info(), wrap=True)
     print_to_box(items["cpu"], print_cpu_info(), wrap=False)
     print_to_box(items["ram"], print_ram_info(), wrap=False)
     print_to_box(items["pci"], print_pci_info(), wrap=False)
@@ -129,10 +162,6 @@ def print_info(items):
 
 def main(stdscr):
     global MAX_ROWS, MAX_COLS
-    if curses.has_colors():
-        curses.start_color()
-        curses.init_pair(1, 214, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
 
     stdscr.refresh()
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
@@ -170,3 +199,5 @@ def main(stdscr):
 
 
 wrapper(main)
+# if __name__ == "__main__":
+    # print(get_logo())
