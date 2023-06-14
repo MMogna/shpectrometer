@@ -134,16 +134,9 @@ def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
 
 
 def draw_ui(stdscr):
-    logo = create_box(top=0,
-                      left=0,
-                      width=10,
-                      height=25,
-                      draw_border=True,
-                      fill=False,
-                      title="Shpectrometer")
     host = create_box(top=0,
-                      left=10,
-                      width=24,
+                      left=00,
+                      width=34,
                       height=25,
                       draw_border=True,
                       title="Host info")
@@ -202,14 +195,9 @@ def draw_ui(stdscr):
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
     stdscr.addstr(MAX_ROWS - 1 , 18, f" Press R to refresh. ", curses.color_pair(1))
-
-    y, x = logo[0].getmaxyx()
-    box = curses.newwin(y,
-                        x,
-                        0,
-                        0)
-
-    print_to_box(logo, get_info(), wrap=False, cp = curses.A_BOLD, indent_level=0)
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 75, f"Shpectrometer v0.1.0 - ", curses.color_pair(1))
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 52, f"Created by Elemento Cloud.", curses.color_pair(1) | curses.A_BOLD)
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 25, f"Visit www.elemento.cloud")
 
     return items
 
@@ -226,6 +214,7 @@ def print_info(items):
 def main(stdscr, legacy_borders):
     global MAX_ROWS, MAX_COLS, LEGACY_BORDERS
     LEGACY_BORDERS = legacy_borders
+    curses.curs_set(0)
     stdscr.encoding = "utf_8"
     stdscr.refresh()
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
