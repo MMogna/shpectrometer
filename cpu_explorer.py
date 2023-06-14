@@ -4,6 +4,8 @@ CMD_CPU_MODEL = r"grep -m 1 'model name' /proc/cpuinfo | cut -d ':' -f2"
 CMD_GET_CORES = r"lscpu | grep 'Core(s) per socket: ' | cut -d ':' -f2"
 CMD_GET_THREADS = r"lscpu | grep '^CPU(s): ' | cut -d ':' -f2"
 CMD_CPU_FREQ = r"lscpu | grep MHz | cut -d ':' -f2"
+CMD_MANUF = r'dmidecode -t 2 | grep Manufacturer: | cut -d ":" -f2'
+CMD_MODEL = r'dmidecode -t 2 | grep "Product Name:" | cut -d ":" -f2'
 
 def get_cpu_model():
     output = subprocess.run(CMD_CPU_MODEL,
@@ -36,12 +38,27 @@ def get_frequency():
     return output
 
 
+def get_mobo_manufacturer():
+    output = subprocess.run(CMD_MANUF,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    return output.stdout.decode().rstrip().strip()
+
+
+def get_mobo_model():
+    output = subprocess.run(CMD_MODEL,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    return output.stdout.decode().rstrip().strip()
+
+
 def print_cpu_info():
     freq = get_frequency()
     output = ""
     output += f"Model: {get_cpu_model()}\n"
     output += f"Topology: {get_cores()} cores/{get_threads()} threads\n"
     output += f"Frequency: {freq[0]} (min. {freq[2]}, max. {freq[1]})\n"
+    output += f"Motherboard model: {get_mobo_manufacturer()} {get_mobo_model()}\n"
     return output
 
 
