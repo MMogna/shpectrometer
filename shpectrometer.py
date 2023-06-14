@@ -106,31 +106,35 @@ def print_and_format(target, index, line, header_attr=None, text_attr=None):
 
 
 def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
-    box = boxes[1]
-    text=text.strip().rstrip()
-    y, x = box.getmaxyx()
-    if wrap:
-        text = textwrap.fill(text, width=x -1, max_lines=y)
-        i = 0
-        for line in text.splitlines(True):
-            print_and_format(box, i, line)
-            i+=1
-    else:
-        text = text.splitlines(True)
-        text_list = []
-        for i, t in enumerate(text):
-            wrapped = textwrap.wrap(t, width=x-1, break_long_words=False, subsequent_indent=" "*indent_level)
-            text_list += wrapped
-        i = 0
-        for line in text_list:
-            if i > y - 2:
-                i += print_and_format(box, i, f"{' '*(x-6)}[...]")
-                break
-            i += print_and_format(box, i, line)
-            if len(line) > x:
+    try:
+        box = boxes[1]
+        text=text.strip().rstrip()
+        y, x = box.getmaxyx()
+        if wrap:
+            text = textwrap.fill(text, width=x -1, max_lines=y)
+            i = 0
+            for line in text.splitlines(True):
+                print_and_format(box, i, line)
                 i+=1
-            i+=1
-    box.refresh()
+        else:
+            text = text.splitlines(True)
+            text_list = []
+            for i, t in enumerate(text):
+                wrapped = textwrap.wrap(t, width=x-1, break_long_words=False, subsequent_indent=" "*indent_level)
+                text_list += wrapped
+            i = 0
+            for line in text_list:
+                if i > y - 2:
+                    i += print_and_format(box, i-1, f"{' '*(x-6)}[...]")
+                    break
+                i += print_and_format(box, i, line)
+                if len(line) > x:
+                    i+=1
+                i+=1
+        box.refresh()
+    except CursesError:
+        boxes[0].addstr(1, 3, "Box too small!", curses.color_pair(2))
+        boxes[0].refresh()
 
 
 def draw_ui(stdscr):
@@ -143,28 +147,28 @@ def draw_ui(stdscr):
 
     cpu = create_box(top=0,
                      left=34,
-                     width=25,
+                     width=36,
                      height=25,
                      draw_border=True,
                      title="CPU info")
 
     ram = create_box(top=0,
-                     left=59,
-                     width=41,
+                     left=70,
+                     width=30,
                      height=25,
                      draw_border=True,
                      title="RAM info")
 
     net = create_box(top=26,
                      left=0,
-                     width=40,
+                     width=34,
                      height=74,
                      draw_border=True,
                      title="Network info")
 
     dsk = create_box(top=26,
-                     left=40,
-                     width=30,
+                     left=34,
+                     width=36,
                      height=74,
                      draw_border=True,
                      title="Disk info")
@@ -195,9 +199,9 @@ def draw_ui(stdscr):
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
     stdscr.addstr(MAX_ROWS - 1 , 18, f" Press R to refresh. ", curses.color_pair(1))
-    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 75, f"Shpectrometer v0.1.0 - ", curses.color_pair(1))
-    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 52, f"Created by Elemento Cloud.", curses.color_pair(1) | curses.A_BOLD)
-    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 25, f"Visit www.elemento.cloud")
+    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 75, f"Shpectrometer v0.1.0 - ", curses.color_pair(1))
+    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 52, f"Created by Elemento Cloud.", curses.color_pair(1) | curses.A_BOLD)
+    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 25, f"Visit www.elemento.cloud")
 
     return items
 
