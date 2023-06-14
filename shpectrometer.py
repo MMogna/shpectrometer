@@ -3,6 +3,10 @@ from _curses import error as CursesError
 from curses import wrapper
 import textwrap
 from os import environ, geteuid
+import locale
+import argparse
+
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 from host_explorer import print_host_info
 from cpu_explorer import print_cpu_info
@@ -18,6 +22,9 @@ def check_privileges():
 check_privileges()
 
 global MAX_ROWS, MAX_COLS
+global LEGACY_BORDERS
+
+LEGACY_BORDERS=False
 
 curses.initscr()
 if curses.has_colors():
@@ -56,7 +63,10 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
                         top,
                         left)
     if draw_border:
-        box.border(0, 0, 0, 0, 0, 0, 0, 0)
+        if LEGACY_BORDERS:
+            box.border('|', '|', '-', '-', '+', '+', '+', '+')
+        else:
+            box.border(0, 0, 0, 0, 0, 0, 0, 0)
     if title:
         box.addstr(0, 2, f" {title} ", curses.color_pair(1) | curses.A_BOLD)
     box.refresh()
@@ -74,7 +84,7 @@ def print_and_format(target, index, line, header_attr=None, text_attr=None):
         found = line.index(':')
         is_header = False
         try:
-            is_header = line[found+1] == ' ' and line[0] != ' '
+            is_header = (line[found+1] == ' ' and line[0] != ' ')
         except IndexError:
             is_header = True
         if is_header:
@@ -94,14 +104,14 @@ def print_to_box(boxes, text, wrap=True, cp=None):
     if wrap:
         text = textwrap.fill(text, width=x -1, max_lines=y)
         i = 0
-        for line in text.split('/n'):
+        for line in text.splitlines(True):
             print_and_format(box, i, line)
             i+=1
     else:
-        text = text.split("\n")
+        text = text.splitlines(True)
         text_list = []
         for i, t in enumerate(text):
-            wrapped = textwrap.wrap(t, width=x-1)
+            wrapped = textwrap.wrap(t, width=x-1, break_long_words=True)
             text_list += wrapped
         i = 0
         for line in text_list:
@@ -205,9 +215,10 @@ def print_info(items):
     print_to_box(items["pow"], print_total_power(), wrap=False)
 
 
-def main(stdscr):
-    global MAX_ROWS, MAX_COLS
-
+def main(stdscr, legacy_borders):
+    global MAX_ROWS, MAX_COLS, LEGACY_BORDERS
+    LEGACY_BORDERS = legacy_borders
+    stdscr.encoding = "utf_8"
     stdscr.refresh()
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
 
@@ -246,6 +257,11 @@ def main(stdscr):
         curses.flushinp()
 
 
-wrapper(main)
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+                    prog='Elemento Shell Meter',
+                    description='A CLI utility to display system info')
+    parser.add_argument('-l', '--legacy', action='store_true')
+    args = parser.parse_args()
+    wrapper(main, args.legacy)
     # print(get_info())
