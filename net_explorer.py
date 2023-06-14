@@ -131,10 +131,10 @@ def get_net_config(nic_name):
 def print_nics():
     nics = get_nics()
     nic_configs = {}
+    nic_configs["bmc"] = get_bmc_net_config()
     for n in nics:
         nic_configs[n] = get_net_config(n)
     
-    nic_configs["bmc"] = get_bmc_net_config()
 
     output = ""
     for n, nc in nic_configs.items():
