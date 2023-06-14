@@ -12,6 +12,7 @@ CMD_BMC_MAC = "ipmitool lan print | grep -m 1 'MAC Address' | cut -d ':' -f2-"
 CMD_BMC_MASK = "ipmitool lan print | grep -m 1 'Subnet Mask' | cut -d ':' -f2"
 
 SPEED_LUT = {
+    "-1": "Unknown",
     '100': '100Mbps',
     '1000': '1Gbps',
     '2500': '2.5Gbps',
@@ -78,7 +79,7 @@ def get_bmc_net_config():
     
     ret = {
             "name": "bmc",
-            "mac": mac,
+            "mac": mac.upper(),
             "speed": "100",
             "addr": [
                 {
@@ -104,7 +105,7 @@ def get_net_config(nic_name):
     ip_data = json.loads(result.stdout.decode())[0]
     addr_info = ip_data["addr_info"]
     nic_config = {}
-    nic_config["name"] = f"{nic_name} @ {br}" if br else nic_name 
+    nic_config["name"] = f"{nic_name} (part of {br})" if br else nic_name 
     nic_config["mac"] = ip_data["address"].upper()
     nic_config["addr"] = []
     for a in addr_info:
@@ -137,14 +138,15 @@ def print_nics():
 
     output = ""
     for n, nc in nic_configs.items():
-        addr_strs = []
-        for a in nc["addr"]:
-             addr_strs.append(f"{a['ip']}/{a['mask']} gateway {a.get('gw')}")
-        output+=f"{nc['name']}:\n"
-        output+=f"  addr: {', '.join(addr_strs)}\n"
-        output+=f"  mac: {nc['mac']}\n"
-        output+=f"  speed: {SPEED_LUT[nc['speed']]}\n"
-        output+="\n"
+        if nc["addr"]:
+            addr_strs = []
+            for a in nc["addr"]:
+                addr_strs.append(f"{a['ip']}/{a['mask']} gateway {a.get('gw')}")
+            output+=f"{nc['name']}:\n"
+            output+=f"  addr: {', '.join(addr_strs)}\n"
+            output+=f"  mac: {nc['mac']}\n"
+            output+=f"  speed: {SPEED_LUT[nc.get('speed')]}\n"
+            output+="\n"
 
     return output
 
