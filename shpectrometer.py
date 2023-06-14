@@ -199,9 +199,9 @@ def draw_ui(stdscr):
 
     stdscr.addstr(MAX_ROWS - 1 , 0, f" Press Q to quit. ", curses.color_pair(2))
     stdscr.addstr(MAX_ROWS - 1 , 18, f" Press R to refresh. ", curses.color_pair(1))
-    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 75, f"Shpectrometer v0.1.0 - ", curses.color_pair(1))
-    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 52, f"Created by Elemento Cloud.", curses.color_pair(1) | curses.A_BOLD)
-    # stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 25, f"Visit www.elemento.cloud")
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 75, f"Shpectrometer v0.1.0 - ", curses.color_pair(1))
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 52, f"Created by Elemento Cloud.", curses.color_pair(1) | curses.A_BOLD)
+    stdscr.addstr(MAX_ROWS - 1 , MAX_COLS - 25, f"Visit www.elemento.cloud")
 
     return items
 
@@ -218,7 +218,7 @@ def print_info(items):
 def main(stdscr, legacy_borders):
     global MAX_ROWS, MAX_COLS, LEGACY_BORDERS
     LEGACY_BORDERS = legacy_borders
-    curses.curs_set(0)
+    # curses.curs_set(0)
     stdscr.encoding = "utf_8"
     stdscr.refresh()
     MAX_ROWS, MAX_COLS = stdscr.getmaxyx()
@@ -265,4 +265,3 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--legacy', action='store_true')
     args = parser.parse_args()
     wrapper(main, args.legacy)
-    # print(get_info())
