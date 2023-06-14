@@ -55,6 +55,8 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
 
     if left + width > MAX_COLS:
         width = MAX_COLS - left
+    if left + width == MAX_COLS - 1:
+        width +=1
     if top + height > MAX_ROWS:
         height = MAX_ROWS - top
 
@@ -97,7 +99,7 @@ def print_and_format(target, index, line, header_attr=None, text_attr=None):
 
 
 
-def print_to_box(boxes, text, wrap=True, cp=None):
+def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
     box = boxes[1]
     text=text.strip().rstrip()
     y, x = box.getmaxyx()
@@ -111,7 +113,7 @@ def print_to_box(boxes, text, wrap=True, cp=None):
         text = text.splitlines(True)
         text_list = []
         for i, t in enumerate(text):
-            wrapped = textwrap.wrap(t, width=x-1, break_long_words=True)
+            wrapped = textwrap.wrap(t, width=x-1, break_long_words=False, subsequent_indent=" "*indent_level)
             text_list += wrapped
         i = 0
         for line in text_list:
@@ -170,15 +172,15 @@ def draw_ui(stdscr):
 
     pci = create_box(top=26,
                      left=50,
-                     width=25,
-                     height=74,
+                     width=50,
+                     height=40,
                      draw_border=True,
                      title="PCIe info")
 
-    pow = create_box(top=26,
-                     left=75,
-                     width=25,
-                     height=74,
+    pow = create_box(top=65,
+                     left=50,
+                     width=50,
+                     height=35,
                      draw_border=True,
                      title="Power info")
 
@@ -201,7 +203,7 @@ def draw_ui(stdscr):
                         0,
                         0)
 
-    print_to_box(logo, get_info(), wrap=False, cp = curses.A_BOLD)
+    print_to_box(logo, get_info(), wrap=False, cp = curses.A_BOLD, indent_level=0)
 
     return items
 
