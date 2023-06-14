@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import curses
 from _curses import error as CursesError
 from curses import wrapper
