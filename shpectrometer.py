@@ -84,6 +84,7 @@ def create_box(top, left, width, height, draw_border=False, title=None, fill=Fal
 
 
 def print_and_format(target, index, line, header_attr=None, text_attr=None):
+    skip_line = False
     if len(line) and ':' in line:
         found = line.index(':')
         is_header = False
@@ -94,11 +95,14 @@ def print_and_format(target, index, line, header_attr=None, text_attr=None):
         if is_header:
             lines = line.split(':', 1)
             if len(lines) == 2:
+                if not lines[1] and index > 0:
+                        skip_line = True
+                        lines[0] = f"\n{lines[0]}"
                 target.addstr(index, 0, f"{lines[0]}:", header_attr or curses.color_pair(5))
                 target.addstr(index, len(lines[0])+1, lines[1], text_attr or curses.color_pair(3))
-                return
+                return skip_line
     target.addstr(index, 0, line, text_attr or curses.color_pair(3))
-
+    return skip_line
 
 
 def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
@@ -120,9 +124,9 @@ def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
         i = 0
         for line in text_list:
             if i > y - 2:
-                print_and_format(box, i, f"{' '*(x-6)}[...]")
+                i += print_and_format(box, i, f"{' '*(x-6)}[...]")
                 break
-            print_and_format(box, i, line)
+            i += print_and_format(box, i, line)
             if len(line) > x:
                 i+=1
             i+=1
@@ -132,14 +136,14 @@ def print_to_box(boxes, text, wrap=True, cp=None, indent_level=2):
 def draw_ui(stdscr):
     logo = create_box(top=0,
                       left=0,
-                      width=16,
+                      width=10,
                       height=25,
                       draw_border=True,
                       fill=False,
-                      title="Elemento Shell Meter")
+                      title="Shpectrometer")
     host = create_box(top=0,
-                      left=16,
-                      width=18,
+                      left=10,
+                      width=24,
                       height=25,
                       draw_border=True,
                       title="Host info")
@@ -160,29 +164,29 @@ def draw_ui(stdscr):
 
     net = create_box(top=26,
                      left=0,
-                     width=25,
+                     width=40,
                      height=74,
                      draw_border=True,
                      title="Network info")
 
     dsk = create_box(top=26,
-                     left=25,
-                     width=25,
+                     left=40,
+                     width=30,
                      height=74,
                      draw_border=True,
                      title="Disk info")
 
     pci = create_box(top=26,
-                     left=50,
-                     width=50,
-                     height=40,
+                     left=70,
+                     width=30,
+                     height=45,
                      draw_border=True,
                      title="PCIe info")
 
-    pow = create_box(top=65,
-                     left=50,
-                     width=50,
-                     height=35,
+    pow = create_box(top=70,
+                     left=70,
+                     width=30,
+                     height=30,
                      draw_border=True,
                      title="Power info")
 
