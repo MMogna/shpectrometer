@@ -207,12 +207,31 @@ def draw_ui(stdscr):
 
 
 def print_info(items):
-    print_to_box(items["host"], print_host_info(), wrap=False)
-    print_to_box(items["cpu"], print_cpu_info(), wrap=False)
-    print_to_box(items["ram"], print_ram_info(), wrap=False)
-    print_to_box(items["pci"], print_pci_info(), wrap=False)
-    print_to_box(items["net"], print_nics(), wrap=False)
-    print_to_box(items["pow"], print_total_power(), wrap=False)
+        
+    try:
+        print_to_box(items["host"], print_host_info(), wrap=False)
+    except Exception as e:
+        print_to_box(items["host"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["cpu"], print_cpu_info(), wrap=False)
+    except Exception as e:
+        print_to_box(items["cpu"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["ram"], print_ram_info(), wrap=False)
+    except Exception as e:
+        print_to_box(items["ram"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["pci"], print_pci_info(), wrap=False)
+    except Exception as e:
+        print_to_box(items["pci"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["net"], print_nics(), wrap=False)
+    except Exception as e:
+        print_to_box(items["net"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["pow"], print_total_power(), wrap=False)
+    except Exception as e:
+        print_to_box(items["pow"], f"An error occurred: {e}\n", wrap=False)
 
 
 def main(stdscr, legacy_borders):
