@@ -15,6 +15,7 @@ from cpu_explorer import print_cpu_info
 from ram_explorer import print_ram_info
 from pci_explorer import print_pci_info
 from net_explorer import print_nics
+from sto_explorer import print_sto_info
 from pow_explorer import print_total_power
 
 def check_privileges():
@@ -228,6 +229,10 @@ def print_info(items):
         print_to_box(items["net"], print_nics(), wrap=False)
     except Exception as e:
         print_to_box(items["net"], f"An error occurred: {e}\n", wrap=False)
+    try:
+        print_to_box(items["dsk"], print_sto_info(), wrap=False)
+    except Exception as e:
+        print_to_box(items["dsk"], f"An error occurred: {e}\n", wrap=False)
     try:
         print_to_box(items["pow"], print_total_power(), wrap=False)
     except Exception as e:
