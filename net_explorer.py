@@ -108,6 +108,7 @@ def get_net_config(nic_name):
         result = subprocess.run(CMD_IP_WRAPPER.replace("<INTERFACE_NAME>", master),
                         shell=True,
                         stdout=subprocess.PIPE)
+        ip_data = json.loads(result.stdout.decode())[0]
     addr_info = ip_data["addr_info"]
     nic_config = {}
     nic_config["name"] = f"{nic_name} (part of {master})" if master else nic_name 
