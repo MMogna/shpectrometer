@@ -60,6 +60,20 @@ def get_phys_devices():
     return ret
 
 
+def get_md_devices():
+    output = subprocess.run(CMD_GET_MD_DEVICES,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    output = output.stdout.decode().splitlines()[1:]
+    output = [o.split() for o in output]
+    output = [{'name': o[0], 
+               'mode': o[3],
+               'devices': o[4:]} for o in output]
+    for o in output:
+        o["devices"] = [f"/dev/{d.split('[')[0]}" for d in o["devices"]]
+    return output    
+
+
 def get_md_members(md_name):
     output = subprocess.run(CMD_GET_MD_MEMBERS.replace("<MD_NAME>", md_name),
                             shell=True,
@@ -100,8 +114,11 @@ def print_sto_info():
     md_devs = ""
     zfs_devs = ""
     for d in get_phys_devices():
-        phys_devs += f"  {d['model'].split('(')[0]} {d['type']}-> {d['device']} ({d['size']})\n"
+        phys_devs += f"  {d['model'].split('(')[0]} {d['type']} -> {d['device']} ({d['size']})\n"
     
+    for d in get_md_devices():
+        md_devs += f"  Linux Software RAID -> {d['name']} ({d['mode']}) -> {', '.join(d['devices'])}\n"
+
     for d in get_zfs_devices():
         zfs_devs += f"  ZFS Software RAID -> {d['name']} ({d['size']}) -> []\n"
     
