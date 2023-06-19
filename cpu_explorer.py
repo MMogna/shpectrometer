@@ -3,7 +3,9 @@ import subprocess
 CMD_CPU_MODEL = r"grep -m 1 'model name' /proc/cpuinfo | cut -d ':' -f2"
 CMD_GET_CORES = r"lscpu | grep 'Core(s) per socket: ' | cut -d ':' -f2"
 CMD_GET_THREADS = r"lscpu | grep '^CPU(s): ' | cut -d ':' -f2"
-CMD_CPU_FREQ = r"lscpu | grep MHz | cut -d ':' -f2"
+CMD_CPU_MIN_FREQ = r"lscpu | grep 'CPU min MHz' | cut -d ':' -f2"
+CMD_CPU_MAX_FREQ = r"lscpu | grep 'CPU max MHz' | cut -d ':' -f2"
+CMD_CPU_CUR_FREQ = r"dmidecode -t processor | grep 'Current Speed' | cut -d ':' -f2"
 CMD_MANUF = r'dmidecode -t 2 | grep Manufacturer: | cut -d ":" -f2'
 CMD_MODEL = r'dmidecode -t 2 | grep "Product Name:" | cut -d ":" -f2'
 
@@ -29,12 +31,21 @@ def get_threads():
 
 
 def get_frequency():
-    output = subprocess.run(CMD_CPU_FREQ,
+    min_freq = subprocess.run(CMD_CPU_MIN_FREQ,
                             shell=True,
                             stdout=subprocess.PIPE)
-    output = output.stdout.decode().split()
-    output = [float(f) for f in output]
-    output = [f"{f/1000:.2f}GHz" if f>1000 else f"{f:.2f}MHz" for f in output]
+    min_freq = min_freq.stdout.decode().strip().rstrip()
+    max_freq = subprocess.run(CMD_CPU_MAX_FREQ,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    max_freq = max_freq.stdout.decode().strip().rstrip()
+    cur_freq = subprocess.run(CMD_CPU_CUR_FREQ,
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    cur_freq = cur_freq.stdout.decode().strip().rstrip()
+    output = [cur_freq, max_freq, min_freq]
+    # output = [float(f) for f in output]
+    # output = [f"{f/1000:.2f}GHz" if f>1000 else f"{f:.2f}MHz" for f in output]
     return output
 
 
