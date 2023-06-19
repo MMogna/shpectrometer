@@ -95,17 +95,22 @@ def get_bmc_net_config():
 
 
 def get_net_config(nic_name):
-    br = get_nic_master_bridge(nic_name=nic_name)
+    master = get_nic_master_bridge(nic_name=nic_name)
     nic_to_find = nic_name
-    if br:
-        nic_to_find = br
+    if master:
+        nic_to_find = master
     result = subprocess.run(CMD_IP_WRAPPER.replace("<INTERFACE_NAME>", nic_to_find),
                             shell=True,
                             stdout=subprocess.PIPE)
     ip_data = json.loads(result.stdout.decode())[0]
+    if "master" in ip_data:
+        master = ip_data["master"]
+        result = subprocess.run(CMD_IP_WRAPPER.replace("<INTERFACE_NAME>", master),
+                        shell=True,
+                        stdout=subprocess.PIPE)
     addr_info = ip_data["addr_info"]
     nic_config = {}
-    nic_config["name"] = f"{nic_name} (part of {br})" if br else nic_name 
+    nic_config["name"] = f"{nic_name} (part of {master})" if master else nic_name 
     nic_config["mac"] = ip_data["address"].upper()
     nic_config["addr"] = []
     for a in addr_info:
