@@ -62,21 +62,39 @@ def get_nic_master_bridge(nic_name):
 def get_bmc_net_config():
     output = subprocess.run(CMD_BMC_IP,
                             shell=True,
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     ip = output.stdout.decode().strip()
     output = subprocess.run(CMD_BMC_GW,
                             shell=True,
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     gw = output.stdout.decode().strip()
     output = subprocess.run(CMD_BMC_MAC,
                             shell=True,
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     mac = output.stdout.decode().strip()
     output = subprocess.run(CMD_BMC_MASK,
                             shell=True,
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     mask = output.stdout.decode().strip()
-    
+    if mac == '':
+        fake_return = {
+            "name": "bmc",
+            "mac": '',
+            "speed": "",
+            "addr": [
+                {
+                    "type": "ipv4",
+                    "ip": '',
+                    "mask": '',
+                    "gw": ''
+                }
+            ]
+        }
+        return fake_return
     ret = {
             "name": "bmc",
             "mac": mac.upper(),
